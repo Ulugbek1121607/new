@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fast Food Buyurtma Tizimi</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: black;
+            color: white;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #222;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.4rem;
+            margin-bottom: 20px;
+            color: red;
+        }
+
+        #menu {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .menu-item {
+            flex: 1 1 calc(45% - 15px);
+            background: #444;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.3s;
+            text-align: center;
+        }
+
+        .menu-item:hover {
+            background: red;
+            color: black;
+            transform: translateY(-5px);
+        }
+
+        #order {
+            margin-top: 30px;
+            padding: 30px;
+            border: 1px solid white;
+            border-radius: 10px;
+            background: #333;
+        }
+
+        #order ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        #order ul li {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            padding: 10px;
+            background: #444;
+            color: white;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .remove-btn {
+            background: red;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .remove-btn:hover {
+            background: white;
+            color: black;
+        }
+
+        #totalPrice {
+            font-weight: bold;
+            color: red;
+            font-size: 1.5rem;
+            margin: 10px 0;
+        }
+
+        button {
+            padding: 35px 10px;
+            font-size: 1rem;
+            color: white;
+            background: red;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: white;
+            color: black;
+        }
+    body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    background: black;
+    background-image: url('photo.jpg'); /* Adding the background image */
+    background-size: cover; /* Ensures the image covers the entire background */
+    background-position: center; /* Centers the image */
+    background-attachment: fixed; /* Keeps the background fixed while scrolling */
+    color: white;
+         menu-item {
+    flex: 1 1 calc(45% - 15px);
+    background: #444;
+    background-image: url('photo.jpg'); /* Adding the background image */
+    background-size: cover; /* Ensures the image covers the menu item */
+    background-position: center; /* Centers the image */
+    color: white;
+    padding: 15px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform 0.2s, background 0.3s;
+    text-align: center;
+}
+}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Fast Food Buyurtma Tizimi</h1>
+        <div id="menu"></div>
+        <h2>Buyurtma:</h2>
+        <div id="order">
+            <ul id="orderList"></ul>
+            <p>Jami: <span id="totalPrice">0</span> so'm</p>
+            <button id="cancelOrder"> Bekor Qilish</button>
+            <button id="submitOrder">Buyurtma berish</button>
+            <button id="sendReport">Hisobotni yuborish</button>
+            <button id="cleanOrders">  Tozalash  </button>
+        </div>
+    </div>
+    <script>
+        const menu = [
+            { id: 1, name: "Mesnoy 20", price: 20000 },
+            { id: 2, name: "Mesnoy 30", price: 30000 },
+            { id: 3, name: "Standart 17", price: 17000 },
+            { id: 4, name: "Standart 12", price: 12000 },
+            { id: 5, name: "Lavash", price: 30000 },
+            { id: 6, name: "Xaggi", price: 25000 },
+            { id: 7, name: "Coffe", price: 5000 },
+            { id: 8, name: "Choy", price: 3000 }
+        ];
+
+        const order = [];
+        let totalRevenue = 0;
+        let orderNumber = 1;
+
+        const menuContainer = document.getElementById("menu");
+        const orderList = document.getElementById("orderList");
+        const totalPriceEl = document.getElementById("totalPrice");
+
+        const TELEGRAM_BOT_TOKEN = "8014692392:AAFYbtxxOAggY7fxfTrwKX8EZtYWDSWXFCs";
+        const TELEGRAM_CHAT_ID = "7261350095";
+
+        menu.forEach(item => {
+            const menuItem = document.createElement("div");
+            menuItem.className = "menu-item";
+            menuItem.textContent = `${item.name} - ${item.price} so'm`;
+            menuItem.onclick = () => addToOrder(item);
+            menuContainer.appendChild(menuItem);
+        });
+
+        function addToOrder(item) {
+            order.push(item);
+            updateOrder();
+        }
+
+        function updateOrder() {
+            orderList.innerHTML = "";
+            let total = 0;
+
+            order.forEach((item, index) => {
+                total += item.price;
+
+                const listItem = document.createElement("li");
+                listItem.textContent = `${index + 1}. ${item.name} - ${item.price} so'm`;
+
+                const removeBtn = document.createElement("button");
+                removeBtn.className = "remove-btn";
+                removeBtn.textContent = "O'chirish";
+                removeBtn.onclick = () => removeItem(index);
+
+                listItem.appendChild(removeBtn);
+                orderList.appendChild(listItem);
+            });
+
+            totalPriceEl.textContent = total;
+        }
+
+        function removeItem(index) {
+            order.splice(index, 1);
+            updateOrder();
+        }
+
+        document.getElementById("cancelOrder").onclick = () => {
+            order.length = 0;
+            updateOrder();
+        };
+
+        document.getElementById("submitOrder").onclick = () => {
+            if (order.length === 0) {
+                alert("Buyurtma bo'sh! Iltimos, avval biror narsa qo'shing.");
+                return;
+            }
+
+            let total = 0;
+            let orderDetails = `Buyurtma Tafsilotlari (№${orderNumber}):\n`;
+            order.forEach((item, index) => {
+                total += item.price;
+                orderDetails += `${index + 1}. ${item.name} - ${item.price} so'm\n`;
+            });
+            orderDetails += `\nJami: ${total} so'm`;
+
+            sendToTelegram(orderDetails);
+
+            totalRevenue += total;
+            orderNumber++;
+            alert("Buyurtma yuborildi!");
+            order.length = 0;
+            updateOrder();
+        };
+
+        document.getElementById("sendReport").onclick = () => {
+            const message = `Jami daromad: ${totalRevenue} so'm`;
+            sendToTelegram(message);
+            alert("Hisobot Telegramga yuborildi!");
+        };
+
+        document.getElementById("cleanOrders").onclick = () => {
+            const now = new Date();
+            const timestamp = now.toISOString().replace("T", " ").slice(0, 19);
+            const message = `Bugungi kassa ${timestamp} da yopildi.`;
+
+            sendToTelegram(message);
+
+            order.length = 0;
+            totalRevenue = 0;
+            orderNumber = 1;
+            updateOrder();
+            alert("Yangi kun boshlandi! Barcha buyurtmalar o'chirildi.");
+        };
+
+        function sendToTelegram(message) {
+            const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+            const params = {
+                chat_id: TELEGRAM_CHAT_ID,
+                text: message,
+                parse_mode: "HTML"
+            };
+
+            fetch(url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(params)
+            })
+                .then(response => {
+                    if (response.ok) {
+                        console.log("Xabar Telegramga yuborildi.");
+                    } else {
+                        console.error("Telegramga yuborishda xatolik yuz berdi.");
+                    }
+                })
+                .catch(error => {
+                    console.error("Xato yuz berdi:", error);
+                });
+        }
+    </script>
+</body>
+</html>
